@@ -7,8 +7,9 @@ from multiprocessing import Pool
 import requests
 import bs4
 import time
-import json
+#import json
 # import io
+import  csv
 
 root_url = 'http://wufazhuce.com'
 
@@ -23,6 +24,7 @@ def get_urls(num):
 
 def get_data(url):
     dataList = {}
+    dataList["url"] = url
     response = requests.get(url)    # 读取网页
     if response.status_code != 200:
         return {'noValue': 'noValue'}
@@ -53,9 +55,18 @@ if __name__=='__main__':
     end = time.time()
     print ('use: %.2f s' % (end - start))
 
-    # 保存到文件中
+    # 保存到CVS文件中
+    f = open('res.cvs', 'w', newline='')
+    fWriter = csv.writer(f, delimiter='\t')
+    fWriter.writerow(['URL', 'Index', 'Content', 'imURL'])
     for i in dataList:
+        fWriter.writerow([i['url'], i['index'], i['content'], i['imgUrl']])
         print(i)
+    f.close()
+    
+    """
+    # 保存到json
     jsonData = json.dumps({'data':dataList})
     with open('data.json', 'w') as outfile:
         json.dump(jsonData, outfile)
+    """
