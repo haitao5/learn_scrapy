@@ -17,9 +17,9 @@ def get_url(num):
     # 拼接URL
     return root_url + '/one/' + str(num)
 
-def get_urls(num):
+def get_urls(start, num):
     # 使用map(function, iterable, ...) 函数根据提供的函数对指定序列做映射
-    urls = map(get_url, range(100,100+num))
+    urls = map(get_url, range(start, start+num))
     return urls
 
 def get_data(url):
@@ -36,6 +36,10 @@ def get_data(url):
         if meta.get('name') == 'description':
             dataList["content"] = meta.get('content')
     dataList["imgUrl"] = soup.find_all('img')[1]['src']
+
+    date = soup.select('div[class="one-pubdate"]')[0].get_text()
+    dataList["date"] =date.replace('\n', ' ').strip()
+    print(dataList["date"])
     return dataList
 
 
@@ -46,7 +50,7 @@ if __name__=='__main__':
 
     pool = Pool(4)   # 创建线程池资源
     dataList = []
-    urls = get_urls(10)  # 映射URL列表
+    urls = get_urls(100, 10)  # 映射URL列表
     
     # 
     # 记录运行时间
@@ -58,9 +62,9 @@ if __name__=='__main__':
     # 保存到CVS文件中
     f = open('res.cvs', 'w', newline='')
     fWriter = csv.writer(f, delimiter='\t')
-    fWriter.writerow(['URL', 'Index', 'Content', 'imURL'])
+    fWriter.writerow(['Index', 'Date','Content', 'URL', 'imURL'])
     for i in dataList:
-        fWriter.writerow([i['url'], i['index'], i['content'], i['imgUrl']])
+        fWriter.writerow([i['index'], i['date'], i['content'], i['url'], i['imgUrl']])
         print(i)
     f.close()
     
