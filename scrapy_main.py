@@ -30,27 +30,26 @@ def get_data(url):
         return {'noValue': 'noValue'}
     #print(response.text)
     # 解析    
-    soup = bs4.BeautifulSoup(response.text,"html.parser")
-    dataList["index"] = soup.title.string[4:7]
+    soup = bs4.BeautifulSoup(response.text,"html.parser")   # .encode("UTF-8", "ignore")
+    dataList["index"] = str(soup.title.string[4:8])
     for meta in soup.select('meta'):
         if meta.get('name') == 'description':
-            dataList["content"] = meta.get('content')
-    dataList["imgUrl"] = soup.find_all('img')[1]['src']
-
+            dataList["content"] = str(meta.get('content'))
+    dataList["imgUrl"] = str(soup.find_all('img')[1]['src'])
+    
     date = soup.select('div[class="one-pubdate"]')[0].get_text()
-    dataList["date"] =date.replace('\n', ' ').strip()
-    print(dataList["date"])
+    dataList["date"] = str(date.replace('\n', ' ').strip())
     return dataList
 
 
 if __name__=='__main__':
     """
-    使用 pool.map(function, iter)将迭代器中的数字作为参数依次传入函数中
+        使用 pool.map(function, iter)将迭代器中的数字作为参数依次传入函数中
     """
 
     pool = Pool(4)   # 创建线程池资源
     dataList = []
-    urls = get_urls(100, 10)  # 映射URL列表
+    urls = get_urls(1050, 1000)  # 映射URL列表
     
     # 
     # 记录运行时间
@@ -64,8 +63,13 @@ if __name__=='__main__':
     fWriter = csv.writer(f, delimiter='\t')
     fWriter.writerow(['Index', 'Date','Content', 'URL', 'imURL'])
     for i in dataList:
-        fWriter.writerow([i['index'], i['date'], i['content'], i['url'], i['imgUrl']])
-        print(i)
+        try:
+            print('Current:'+ str(i))
+            fWriter.writerow([i['index'], i['date'], i['content'], i['url'], i['imgUrl']])
+        except Exception as e:
+            print("Unexpected Error: {}".format(e))
+            print('Current:'+ str(i))
+
     f.close()
     
     """
